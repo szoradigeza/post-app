@@ -8,6 +8,9 @@ export const Header = () => {
         <li key="home">
           <Link to="/">My Site</Link>
         </li>
+        <li key="new-post">
+          <Link to="new">New post</Link>
+        </li>
       </ul>
     </div>
   );

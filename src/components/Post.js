@@ -4,7 +4,7 @@ const Post = ({ post }) => {
   return (
     <article className="post container">
       <h1>{post.title}</h1>
-      <div>{post.content}</div>
+      <div dangerouslySetInnerHTML={{ __html: post.content }} />
     </article>
   );
 };
