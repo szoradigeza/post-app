@@ -1,12 +1,21 @@
 import React, { useRef, useState } from "react";
-import { Editor, EditorState } from "draft-js";
+import {
+  ContentState,
+  convertFromHTML,
+  convertFromRaw,
+  Editor,
+  EditorState,
+} from "draft-js";
 import { Redirect } from "react-router";
 import { stateToHTML } from "draft-js-export-html";
 
-export const PostForm = ({ addNewPost }) => {
+export const PostForm = ({ post: propsPost, addNewPost, updatePost }) => {
   const [title, setTitle] = useState("");
+  const [post, setPost] = useState({ ...propsPost });
   const [editorState, setEditorState] = useState(() =>
-    EditorState.createEmpty()
+    EditorState.createWithContent(
+      ContentState.createFromBlockArray(convertFromHTML(propsPost.content))
+    )
   );
   const [saved, setSaved] = useState(false);
 

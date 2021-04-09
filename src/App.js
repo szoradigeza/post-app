@@ -36,6 +36,11 @@ const App = () => {
     },
   ]);
   const [message, setMessage] = useState(null);
+
+  const getNewSlugFromTitle = (title) => {
+    return encodeURIComponent(title.toLowerCase().split(" ").join("-"));
+  };
+
   const setFlashMessage = (message) => {
     setMessage(message);
     setTimeout(() => {
@@ -45,12 +50,20 @@ const App = () => {
 
   const addNewPost = (post) => {
     post.id = posts.length + 1;
-    post.slug = encodeURIComponent(
-      post.title.toLowerCase().split(" ").join("-")
-    );
+    post.slug = getNewSlugFromTitle(post.title);
     setPosts([...posts, post]);
     setFlashMessage("saved");
   };
+
+  const updatePost = (post) => {
+    post.slug = getNewSlugFromTitle(post.title);
+    const index = posts.findIndex((p) => p.id === post.id);
+    const oldPosts = posts.slice(0, index).concat(posts.slice(index));
+    const updatedPosts = [...oldPosts, post].sort((a, b) => a.id - b.id);
+    setPosts(updatePost);
+    setFlashMessage("updated");
+  };
+
   useEffect(() => {
     console.log(posts);
   }, [posts]);
@@ -65,8 +78,6 @@ const App = () => {
             path="/post/:postSlug"
             render={(props) => {
               const post = posts.find((post) => {
-                console.log(post.slug);
-                console.log(props.match.params.postSlug);
                 return post.slug === props.match.params.postSlug;
               });
               if (post) return <Post post={post} />;
@@ -76,7 +87,25 @@ const App = () => {
           <Route
             exact
             path="/new"
-            render={() => <PostForm addNewPost={addNewPost} />}
+            render={() => (
+              <PostForm
+                post={{ id: 0, slug: "", title: "", content: "" }}
+                addNewPost={addNewPost}
+              />
+            )}
+          />
+          <Route
+            path="/edit/:postSlug"
+            render={(props) => {
+              const post = posts.find(
+                (post) => post.slug === props.match.params.postSlug
+              );
+              if (post) {
+                return <PostForm post={post} updatePost={updatePost} />;
+              } else {
+                return <Redirect to="/" />;
+              }
+            }}
           />
         </Switch>
       </div>
