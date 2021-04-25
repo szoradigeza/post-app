@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ContentState,
   convertFromHTML,
@@ -10,11 +10,10 @@ import { Redirect } from "react-router";
 import { stateToHTML } from "draft-js-export-html";
 
 export const PostForm = ({ post: propsPost, addNewPost, updatePost }) => {
-  const [title, setTitle] = useState("");
   const [post, setPost] = useState({ ...propsPost });
   const [editorState, setEditorState] = useState(() =>
     EditorState.createWithContent(
-      ContentState.createFromBlockArray(convertFromHTML(propsPost.content))
+      ContentState.createFromBlockArray(convertFromHTML(post.content))
     )
   );
   const [saved, setSaved] = useState(false);
@@ -24,22 +23,30 @@ export const PostForm = ({ post: propsPost, addNewPost, updatePost }) => {
 
   const handlePostForm = (e) => {
     e.preventDefault();
-    if (title) {
-      const post = {
-        title: title,
-        content: stateToHTML(editorState.getCurrentContent()),
-      };
-      addNewPost(post);
+    if (post.title) {
+      let newPost = post;
+      newPost.content = stateToHTML(editorState.getCurrentContent());
+      console.log(newPost);
+      updatePost ? updatePost(newPost) : addNewPost(newPost);
       console.log(post);
       setSaved(true);
     } else {
-      alert("Title requiired");
+      alert("Title required");
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     focusEditor();
   }, []);
+
+  useEffect(() => {
+    setEditorState(
+      EditorState.createWithContent(
+        ContentState.createFromBlockArray(convertFromHTML(propsPost.content))
+      )
+    );
+    setPost(propsPost);
+  }, [propsPost]);
 
   if (saved === true) {
     return <Redirect to="/" />;
@@ -51,8 +58,8 @@ export const PostForm = ({ post: propsPost, addNewPost, updatePost }) => {
         <br />
         <input
           id="form-title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          value={post.title}
+          onChange={(e) => setPost({ ...post, title: e.target.value })}
         />
         <p>
           <label htmlFor="form-content">Content:</label>
